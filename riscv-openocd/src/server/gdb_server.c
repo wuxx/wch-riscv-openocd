@@ -52,6 +52,9 @@
 #include "rtos/rtos.h"
 #include "target/smp.h"
 
+//#include "cmsis_dap.h"
+#include "jtag/drivers/cmsis_dap.h"
+
 /**
  * @file
  * GDB server implementation.
@@ -126,7 +129,7 @@ static void gdb_sig_halted(struct connection *connection);
 
 /* number of gdb connections, mainly to suppress gdb related debugging spam
  * in helper/log.c when no gdb connections are actually active */
-int gdb_actual_connections;
+//int gdb_actual_connections;
 
 /* set if we are sending a memory map to gdb
  * via qXfer:memory-map:read packet */

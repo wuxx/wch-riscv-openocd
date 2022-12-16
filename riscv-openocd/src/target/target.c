@@ -62,7 +62,7 @@
 
 
 extern unsigned char riscvchip;
-extern int wlink_reset();
+extern int wlink_reset(void);
 extern int wlink_quitreset(void);
 extern int wlink_verify(unsigned long length, unsigned char *buffer);
 static int target_read_buffer_default(struct target *target, target_addr_t address,
@@ -3352,7 +3352,8 @@ COMMAND_HANDLER(handle_reset_command)
 COMMAND_HANDLER(handle_wlink_reset_resume_command)
 {
 	
-	wlink_quitreset();
+	return wlink_quitreset();
+    
 }
 
 COMMAND_HANDLER(handle_resume_command)
@@ -3818,7 +3819,6 @@ static COMMAND_HELPER(handle_verify_image_command_internal, enum verify_mode ver
 	int retval;
 	uint32_t checksum = 0;
 	uint32_t mem_checksum = 0;
-	int i;
 	struct image image;
 
 	struct target *target = get_current_target(CMD_CTX);
@@ -3857,29 +3857,29 @@ static COMMAND_HELPER(handle_verify_image_command_internal, enum verify_mode ver
 	int diffs = 0;
 	retval = ERROR_OK;
 	if(riscvchip){
-		uint32_t  addr=0;
+		//uint32_t  addr=0;
 		unsigned long length;
-        uint8_t *buffer1;
-		uint8_t *buffer2;
+        uint8_t *buffer1 = NULL;
+		uint8_t *buffer2 = NULL;
 
 		length=image.sections[image.num_sections-1].size + image.sections[image.num_sections-1].base_address;
 		
 		
 		buffer2=malloc(length+256);
 		memset(buffer2,0xff,length);
-		for (i = 0; i < image.num_sections; i++) {
+		for (unsigned int i = 0; i < image.num_sections; i++) {
 
 			buffer1 = malloc(image.sections[i].size);
 			retval = image_read_section(&image, i, 0x0, image.sections[i].size, buffer1, &buf_cnt);
 
-			for(int j=0;j<buf_cnt;j++){
+			for(size_t j=0;j<buf_cnt;j++){
 			buffer2[j+image.sections[i].base_address]=buffer1[j];
 
 			}
 	    }
 		if(length%64){
 			
-			for(int j=0;j<64-length%64;j++)
+			for(size_t j=0;j<64-length%64;j++)
 			{
 				buffer2[length+j]=0xff;
 			}

@@ -416,8 +416,10 @@ COMMAND_HANDLER(handle_flash_protect_check_command){
 		return ERROR_OK;
 	}
 
+    return ERROR_OK;
 
 }
+
 COMMAND_HANDLER(handle_flash_write_image_command)
 {
 	struct target *target = get_current_target(CMD_CTX);

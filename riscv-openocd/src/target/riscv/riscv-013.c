@@ -45,7 +45,7 @@ extern unsigned char WriteNonFullPage(unsigned long iaddr,
 
 static int execute_fence(struct target *target);
 extern unsigned char riscvchip;
-extern int server_quit(void);
+//extern int server_quit(void);
 extern unsigned long ramaddr;
 uint32_t flashaddr=0;
 extern bool wchwlink;
@@ -257,34 +257,34 @@ static riscv013_info_t *get_info(const struct target *target)
 }
 static int flush_flash_data(struct target *target)
 {
-	uint64_t regs[31];
-	uint64_t s0; 
-	uint64_t ra;
-	uint64_t sp;
-	uint64_t gp;
-	uint64_t tp;
+	//uint64_t regs[31];
+	//uint64_t s0; 
+	//uint64_t ra;
+	//uint64_t sp;
+	//uint64_t gp;
+	//uint64_t tp;
 	uint64_t a0;
 	uint64_t a4;
-	uint64_t a5;
-	uint64_t a6;
-	uint64_t a7;
-	uint64_t s2;
-	uint64_t s3;
-	uint64_t s4;
-	uint64_t s5;
-	uint64_t s6;
-	uint64_t s7;
-	uint64_t s8;
-	uint64_t s9;
-	uint64_t s10;
-	uint64_t s11;
-	uint64_t t4;
-	uint64_t t5;
-	uint64_t t6;	
-	uint64_t t0;
-	uint64_t t1;
-	uint64_t t2;
-	uint64_t t3;	
+	//uint64_t a5;
+	//uint64_t a6;
+	//uint64_t a7;
+	//uint64_t s2;
+	//uint64_t s3;
+	//uint64_t s4;
+	//uint64_t s5;
+	//uint64_t s6;
+	//uint64_t s7;
+	//uint64_t s8;
+	//uint64_t s9;
+	//uint64_t s10;
+	//uint64_t s11;
+	//uint64_t t4;
+	//uint64_t t5;
+	//uint64_t t6;	
+	//uint64_t t0;
+	//uint64_t t1;
+	//uint64_t t2;
+	//uint64_t t3;	
 	uint64_t s1; 
 	uint64_t a1; 
 	uint64_t a2; 
@@ -328,12 +328,14 @@ static int flush_flash_data(struct target *target)
 	info->flash_offset = 0;
 	memset(info->flash_data,0,sizeof(info->flash_data));
 	}
+
+    return 0;
 }
 int write_flash_data(struct target *target, target_addr_t address,
 		uint32_t size, uint32_t count, uint8_t *buffer)
 {
 	uint32_t total_len;
-	uint32_t start_address,temp,temp1;
+	uint32_t start_address;//temp,temp1;
 	uint8_t * start_buffer;
 	RISCV013_INFO(info);	
 	start_address = address;
@@ -569,7 +571,7 @@ static uint32_t dtmcontrol_scan(struct target *target, uint32_t out)
 
 	uint32_t in = buf_get_u32(field.in_value, 0, 32);
 	if(wchwlink){
-		buf_set_u32(&in, 0, 32, 0x00000071);
+		buf_set_u32((unsigned char *)(&in), 0, 32, 0x00000071);
 	}
 	LOG_DEBUG("DTMCS: 0x%x -> 0x%x", out, in);
 
@@ -622,7 +624,7 @@ static int wlink_dmi_op_timeout(struct target *target, uint32_t *data_in,
 	while (1) {
 		if(dmi_op == DMI_OP_READ)
 		{
-			result=DMI_OP(0, (unsigned char	)address, 0, (unsigned char	)dmi_op, &address_in, data_in,&recvOP);
+			result=DMI_OP(0, (unsigned char	)address, 0, (unsigned char	)dmi_op, (unsigned char *)(&address_in), (long unsigned int *)data_in,&recvOP);
 			if(!result){
 					LOG_ERROR("failed %s at 0x%x, status=%d", op_name, address, status);
 					LOG_ERROR("Maybe the device has been removed");
@@ -630,14 +632,14 @@ static int wlink_dmi_op_timeout(struct target *target, uint32_t *data_in,
 					return ERROR_FAIL;
 				}		
 		}else{
-			DMI_OP(0, (unsigned char	)address, data_out, (unsigned char	)dmi_op, &address_in, &recvData,&recvOP);
+			DMI_OP(0, (unsigned char	)address, data_out, (unsigned char	)dmi_op, (unsigned char *)(&address_in), (long unsigned int *)(&recvData),&recvOP);
 		}
 		status = recvOP;
 		if (status == DMI_STATUS_BUSY) {
 			increase_dmi_busy_delay(target);
 			if (dmi_busy_encountered)
 				*dmi_busy_encountered = true;
-			DMI_OP(0, (unsigned char	)DM_ABSTRACTCS, DM_ABSTRACTCS_CMDERR, (unsigned char	)DMI_OP_WRITE, &address_in, &recvData,&recvOP);
+			DMI_OP(0, (unsigned char	)DM_ABSTRACTCS, DM_ABSTRACTCS_CMDERR, (unsigned char	)DMI_OP_WRITE, (unsigned char *)(&address_in), (long unsigned int *)(&recvData),&recvOP);
 		} else if (status == DMI_STATUS_SUCCESS) {
 			break;
 		} else {
@@ -2654,7 +2656,7 @@ static int assert_reset(struct target *target)
 		LOG_DEBUG("[wch] dcsr read fail!");
 	}
 	else{
-		LOG_DEBUG("[wch] read dcsr value is 0x%x", tmpDcsr);
+		//LOG_DEBUG("[wch] read dcsr value is 0x%x", tmpDcsr);
 		//enable ebreak in m&u mode
 		tmpDcsr = set_field(tmpDcsr, CSR_DCSR_EBREAKM, 1);
 		tmpDcsr = set_field(tmpDcsr, CSR_DCSR_EBREAKU, 1);		
@@ -4189,13 +4191,13 @@ static int write_memory(struct target *target, target_addr_t address,
 		if(riscvchip==0x03){		
 		  uint64_t actual_value;
 		  uint8_t txbuffer[4];
-		  uint32_t  length;		
+		  //uint32_t  length;		
 		  if((address >= ramaddr)){
 					LOG_ERROR("THIS  ADDRESS IS NOT ACCESSIBLE");
 					server_quit();
 					return ERROR_FAIL;																												
 			}										
-			target_addr_t flashaddress=address;
+			//target_addr_t flashaddress=address;
 			if(address < ramaddr)
 			{					
 				if((size*count)==4){						
@@ -4209,14 +4211,14 @@ static int write_memory(struct target *target, target_addr_t address,
 			  			   txbuffer[1]= (((uint32_t)actual_value)&0x0000ff00)>>8;
 			  			   txbuffer[2]= *buffer;
 			  			   txbuffer[3]= *(buffer+1);	  			
-			  		  	   write_memory_progbuf(target, address, 4, 1, &txbuffer);			  		  	 
+			  		  	   write_memory_progbuf(target, address, 4, 1, (unsigned char *)txbuffer);			  		  	 
 			  		  	   address=address+2;
 			  		  	   read_memory_progbuf_one(target, address, 4, (uint8_t*)&actual_value );			  		 
 			  		  	   txbuffer[0]= *(buffer+2);
 			  		   	   txbuffer[1]= *(buffer+3);
 			  			   txbuffer[2]= (((uint32_t)actual_value)&0x00ffffff)>>16;
 			  			   txbuffer[3]=((uint32_t)actual_value)>>24;		  		
-			  		  	   write_memory_progbuf(target, address, 4, 1, &txbuffer);
+			  		  	   write_memory_progbuf(target, address, 4, 1, (unsigned char *)txbuffer);
 			  		  	}	  
 				}else{		
 					if((size*count)!=2){
@@ -4229,7 +4231,7 @@ static int write_memory(struct target *target, target_addr_t address,
 			  			txbuffer[1]= *(buffer+1);
 			  			txbuffer[2]= (((uint32_t)actual_value)&0x00ffffff)>>16;
 			  			txbuffer[3]=((uint32_t)actual_value)>>24;		  		
-			  			write_memory_progbuf(target, address, 4, 1, &txbuffer);
+			  			write_memory_progbuf(target, address, 4, 1, (unsigned char *)txbuffer);
 			  			}else{
 			  					address=address-2;
 			  					read_memory_progbuf_one(target, address, 4, (uint8_t*)&actual_value );			  				
@@ -4237,7 +4239,7 @@ static int write_memory(struct target *target, target_addr_t address,
 			  			    txbuffer[1]= (((uint32_t)actual_value)&0x0000ff00)>>8;
 			  			    txbuffer[2]= *buffer;
 			  			    txbuffer[3]= *(buffer+1);			  		
-			  				write_memory_progbuf(target, address, 4, 1, &txbuffer);		
+			  				write_memory_progbuf(target, address, 4, 1, (unsigned char *)txbuffer);		
 			  			 }	  	
 						}				
 				}
@@ -4249,7 +4251,7 @@ static int write_memory(struct target *target, target_addr_t address,
 		{			
 			if(address>=0x08000000)
 				address-=0x08000000;
-			write_flash_data(target, address, size, count, buffer);			
+			write_flash_data(target, address, size, count, (uint8_t *)buffer);			
 		}
 		return ERROR_OK;
 	}else{
@@ -5041,9 +5043,10 @@ static int maybe_execute_fence_i(struct target *target)
 }
 int wlink_cleancache(struct target *target)
 {
-	uint64_t old_dpc_value,new_dpc_value,t6_new,t6_old;
-	uint32_t dmcontrol;
-	RISCV013_INFO(info);
+	//uint64_t old_dpc_value,new_dpc_value,t6_new,t6_old;
+	uint64_t t6_old;
+	//uint32_t dmcontrol;
+	//RISCV013_INFO(info);
 
 	{
 		struct riscv_program program;
@@ -5051,7 +5054,7 @@ int wlink_cleancache(struct target *target)
 		register_write_direct(target, GDB_REGNO_T6, 4);  
 		riscv_program_init(&program, target);
 		riscv_program_insert(&program, 0x000f8067);      
-		int result = riscv_program_exec(&program, target);
+		riscv_program_exec(&program, target);
 		usleep(1000);		
 		register_write_direct(target, GDB_REGNO_T6, t6_old);	
 	}

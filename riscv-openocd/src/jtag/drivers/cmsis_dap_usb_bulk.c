@@ -470,7 +470,7 @@ extern uint8_t armchip;
 int timeout=300;
 // extern struct libusb_device_handle *wlink_dev_handle;
 extern unsigned  int  chip_type;
-static const uint32_t flash_code1[] = {
+static uint32_t flash_code1[] = {
 	0xE00ABE00, 0x062D780D, 0x24084068, 0xD3000040, 0x1E644058, 0x1C49D1FA, 0x2A001E52, 0x4770D1F2,
     0x4603B510, 0x04C00CD8, 0x444C4C7A, 0x20006020, 0x60204C79, 0x60604879, 0x60604879, 0x62604877,
     0x62604877, 0x69C04620, 0x0004F000, 0xF245B940, 0x4C745055, 0x20066020, 0xF6406060, 0x60A070FF,
@@ -505,7 +505,7 @@ uint32_t program_code1[] = {
 	(uint32_t)sizeof(flash_code1),
 };
 
-static const uint32_t flash_code2[] = {
+static uint32_t flash_code2[] = {
 	0xE00ABE00, 0x062D780D, 0x24084068, 0xD3000040, 0x1E644058, 0x1C49D1FA, 0x2A001E52, 0x4770D1F2,
 	0x4603B510, 0x04C00CD8, 0x444C4C55, 0x20006020, 0x60204C54, 0x60604854, 0x60604854, 0x62604852,
 	0x62604852, 0x69C04620, 0x0004F000, 0xF245B940, 0x4C4F5055, 0x20066020, 0xF6406060, 0x60A070FF,
@@ -688,7 +688,10 @@ int wlink_armcheckprotect(void)
 		}
 		return ERROR_OK;
 	}
+
+	return ERROR_OK;
 }
+
 int wlink_armerase(void)
 {
 	uint8_t buffer_code[] = { 0x81, 0x02, 0x01, 0x05};
@@ -707,8 +710,8 @@ int wlink_armerase(void)
 		comprogram = program_code2;
 		comflash = flash_code2;
 	}
-	uint8_t i = 0;
-	uint8_t *flashcode = (uint8_t *)comflash;
+	//uint8_t i = 0;
+	//uint8_t *flashcode = (uint8_t *)comflash;
 
 	int h = *(comprogram + 10);
 
@@ -750,7 +753,7 @@ int wlink_armerase(void)
 int wlink_armwrite(const uint8_t *buffer, uint32_t offset, uint32_t count)
 {
 	int transferred = 0;
-	uint8_t *addr = &offset;
+	uint8_t *addr = (uint8_t *)(&offset);
 	uint8_t flash_write[] = {0x81, 0x02, 0x01, 0x02};
 	uint8_t buffer_rcode[4];
 	uint8_t i = 0;
@@ -814,8 +817,7 @@ void wlink_armquitreset(struct cmsis_dap *dap)
 	// hid_write(wlink_dev_handle, resetbuffer, 65);
 	// hid_read(wlink_dev_handle, buffer_rcode, 65);
     libusb_bulk_transfer(dap->bdata->dev_handle, 0x02,resetbuffer,sizeof(resetbuffer),&transferred,timeout);
-	int ret=libusb_bulk_transfer(dap->bdata->dev_handle, 0x83,buffer_rcode,sizeof(buffer_rcode),&transferred,timeout);
-
+	libusb_bulk_transfer(dap->bdata->dev_handle, 0x83,buffer_rcode,sizeof(buffer_rcode),&transferred,timeout);
 
 }
 

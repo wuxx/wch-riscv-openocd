@@ -396,13 +396,13 @@ static int ch32x_protect_check(struct flash_bank *bank)
 	if (retval != ERROR_OK)
 		return retval;
 
-	for (int i = 0; i < bank->num_prot_blocks; i++)
+	for (unsigned int i = 0; i < bank->num_prot_blocks; i++)
 		bank->prot_blocks[i].is_protected = (protection & (1 << i)) ? 0 : 1;
 
 	return ERROR_OK;
 }
 
-static int ch32x_erase(struct flash_bank *bank, int first, int last)
+static int ch32x_erase(struct flash_bank *bank, unsigned int first, unsigned int last)
 {	
  if(armchip)
  {
@@ -414,9 +414,11 @@ static int ch32x_erase(struct flash_bank *bank, int first, int last)
 		return ret;
 			
  }	
+ return 0;
+
 }
 
-static int ch32x_protect(struct flash_bank *bank, int set, int first, int last)
+static int ch32x_protect(struct flash_bank *bank, int set, unsigned int first, unsigned int last)
 {
 	printf("%d %d %d\n",set,first,last);
 	return ERROR_OK;
@@ -438,7 +440,7 @@ static int ch32x_protect(struct flash_bank *bank, int set, int first, int last)
 		return retval;
 	}
 
-	for (int i = first; i <= last; i++) {
+	for (unsigned int i = first; i <= last; i++) {
 		if (set)
 			ch32x_info->option_bytes.protection &= ~(1 << i);
 		else
@@ -465,6 +467,7 @@ static int ch32x_write(struct flash_bank *bank, const uint8_t *buffer,
 		return ret;				
  }
 
+ return 0;
 }
 
 static int ch32x_get_device_id(struct flash_bank *bank, uint32_t *device_id)
@@ -473,9 +476,9 @@ static int ch32x_get_device_id(struct flash_bank *bank, uint32_t *device_id)
 	 * the M0 from the M3 devices. */
  
 	struct target *target = bank->target;
-	uint32_t cpuid, device_id_register = 0;
+	//uint32_t cpuid, device_id_register = 0;
     uint32_t testid=0;
-    uint32_t tmp,tmp1,tmp2=0;
+    uint32_t tmp2=0;
 	uint8_t user_cfg,config;
 	target_read_u8(target, 0x1ffff802, &user_cfg);
 	config=user_cfg>>6;
@@ -516,11 +519,11 @@ static int ch32x_get_device_id(struct flash_bank *bank, uint32_t *device_id)
 	return ERROR_FAIL;
 }
 
-static int ch32x_get_flash_size(struct flash_bank *bank, uint16_t *flash_size_in_kb)
+static int ch32x_get_flash_size(struct flash_bank *bank, uint32_t *flash_size_in_kb)
 {	
 	struct target *target = bank->target;
-	uint32_t cpuid, flash_size_reg;
-    uint32_t temp;
+	//uint32_t cpuid, flash_size_reg;
+    //uint32_t temp;
 	int retval = target_read_u32(target, 0x1ffff7e0, flash_size_in_kb);	
 	if (retval != ERROR_OK)
 		return retval;
@@ -531,12 +534,12 @@ static int ch32x_get_flash_size(struct flash_bank *bank, uint16_t *flash_size_in
 static int ch32x_probe(struct flash_bank *bank)
 {	
 	struct ch32x_flash_bank *ch32x_info = bank->driver_priv;
-	uint16_t flash_size_in_kb;
+	uint32_t flash_size_in_kb;
 	uint16_t max_flash_size_in_kb;
 	uint32_t device_id;
 	int page_size;
 	uint32_t base_address = 0x08000000;
-    uint32_t rid=0;
+    //uint32_t rid=0;
 	ch32x_info->probed = 0;
 	ch32x_info->register_base = FLASH_REG_BASE_B0;
 	ch32x_info->user_data_offset = 10;
@@ -550,7 +553,7 @@ static int ch32x_probe(struct flash_bank *bank)
 		return retval;
 	
 	// LOG_INFO("device id = 0x%08" PRIx32 "", device_id);
-	rid=device_id & 0xfff ;
+	//rid=device_id & 0xfff ;
 	/* set page size, protection granularity and max flash size depending on family */
 	switch (device_id & 0xfff) {
 	case 0x410: /* medium density */
@@ -655,7 +658,7 @@ COMMAND_HANDLER(ch32x_handle_part_id_command)
 }
 #endif
 
-static int get_ch32x_info(struct flash_bank *bank, char *buf, int buf_size)
+static int get_ch32x_info(struct flash_bank *bank, struct command_invocation *cmd)
 {
 
 
@@ -992,7 +995,7 @@ static int ch32x_mass_erase(struct flash_bank *bank)
 
 COMMAND_HANDLER(ch32x_handle_mass_erase_command)
 {
-	int i;
+	unsigned int i;
 
 	if (CMD_ARGC < 1)
 		return ERROR_COMMAND_SYNTAX_ERROR;

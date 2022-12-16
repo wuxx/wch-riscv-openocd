@@ -738,8 +738,8 @@ int flash_write_unlock_verify(struct target *target, struct image *image,
 	uint32_t *written, bool erase, bool unlock, bool write, bool verify)
 {
 	int retval = ERROR_OK;
-	uint32_t startaddr;
-	unsigned long binlen;
+	uint32_t startaddr = 0;
+	unsigned long binlen = 0;
 	unsigned int section;
 	uint32_t section_offset;
 	struct flash_bank *c;
